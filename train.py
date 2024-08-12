@@ -1,3 +1,4 @@
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -22,26 +23,27 @@ def train_sagan(generator, discriminator, dataloader, num_epochs, z_dim, device)
             batch_size = real_data.size(0)
             labels_real = torch.ones(batch_size, device=device)
             labels_fake = torch.zeros(batch_size, device=device)
-            output = discriminator(real_data)
+            output = discriminator(real_data).view(-1)
             errD_real = criterion(output, labels_real)
             errD_real.backward()
             noise = torch.randn(batch_size, z_dim, 1, 1, device=device)
             fake_data = generator(noise)
-            output = discriminator(fake_data.detach())
+            output = discriminator(fake_data.detach()).view(-1)
             errD_fake = criterion(output, labels_fake)
             errD_fake.backward()
             optimizerD.step()
             generator.zero_grad()
-            output = discriminator(fake_data)
+            output = discriminator(fake_data).view(-1)
             errG = criterion(output, labels_real)
             errG.backward()
             optimizerG.step()
             if i % 50 == 0:
                 print(f'Epoch [{epoch+1}/{num_epochs}] Batch {i}/{len(dataloader)} \
-                       Loss D: {errD_real.item() + errD_fake.item()}, loss G: {errG.item()}')
+                       Loss D: {errD_real.item() + errD_fake.item()}, Loss G: {errG.item()}')
+
         if (epoch + 1) % 10 == 0:
             with torch.no_grad():
-                fake_images = generator(fixed_noise).detach().cpu()
+                fake_images = generator(fixed_noise ).detach().cpu()
             save_image(fake_images, f'outputs/fake_images_epoch_{epoch+1}.png', normalize=True)
 
 if __name__ == "__main__":

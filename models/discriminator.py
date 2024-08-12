@@ -17,9 +17,9 @@ class Discriminator(nn.Module):
             nn.Conv2d(256, 512, kernel_size=4, stride=2, padding=1, bias=False),
             nn.BatchNorm2d(512),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv2d(512, 1, kernel_size=4, stride=1, padding=0, bias=False),
+            nn.Conv2d(512, 1, kernel_size=2, stride=1, padding=0, bias=False),
             nn.Sigmoid()
         )
 
     def forward(self, input):
-        return self.main(input)
+        return self.main(input).view(-1)
